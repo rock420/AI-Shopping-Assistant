@@ -11,4 +11,21 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "static#root"
+  
+  # API routes
+  namespace :api do
+    resources :products, only: [:index, :show] do
+      collection do
+        get :search
+      end
+    end
+
+    # Baskets routes - session-based basket management
+    get 'baskets/:session_id', to: 'baskets#show'
+    post 'baskets/:session_id/items', to: 'baskets#add_item'
+    patch 'baskets/:session_id/items/:product_id', to: 'baskets#update_item'
+    delete 'baskets/:session_id/items/:product_id', to: 'baskets#destroy_item'
+    delete 'baskets/:session_id', to: 'baskets#destroy'
+
+  end
 end

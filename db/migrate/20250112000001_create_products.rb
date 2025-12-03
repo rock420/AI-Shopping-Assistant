@@ -10,7 +10,7 @@ class CreateProducts < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :products, :name, unique: true
+    add_index :products, :name
     add_index :products, :product_attributes, using: :gin
     add_index :products, :inventory_quantity, where: "inventory_quantity > 0"
     add_check_constraint :products, "price > 0", name: "products_price_positive"

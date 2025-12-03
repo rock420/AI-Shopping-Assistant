@@ -19,18 +19,19 @@ class Basket < ApplicationRecord
   #
   # @param product [Product] The product to add
   # @param quantity [Integer] Quantity to add
+  # @param basket_item [BasketItem, nil] Optional pre-fetched basket item to avoid duplicate query
   # @return [BasketItem] The created or updated basket item
-  def add_product(product, quantity)
-    basket_item = basket_items.find_or_initialize_by(product: product)
+  def add_product(product, quantity, basket_item = nil)
+    basket_item ||= basket_items.find_or_initialize_by(product: product)
     
     if basket_item.persisted?
       basket_item.update!(quantity: basket_item.quantity + quantity)
     else
       basket_item.quantity = quantity
       basket_item.price_at_addition = product.price
+      basket_item.save!
     end
     
-    basket_item.save!
     basket_item
   end
 
@@ -39,16 +40,18 @@ class Basket < ApplicationRecord
   #
   # @param product [Product] The product to remove
   # @param quantity [Integer, nil] Quantity to remove (nil = remove all)
-  # @return [void]
+  # @return [Boolean] true if item was found and removed/updated, false if not found
   def remove_product(product, quantity = nil)
     basket_item = basket_items.find_by(product: product)
-    return unless basket_item
+    return false unless basket_item
 
     if quantity.nil? || basket_item.quantity <= quantity
       basket_item.destroy!
     else
       basket_item.update!(quantity: basket_item.quantity - quantity)
     end
+    
+    true
   end
 
   def clear

@@ -1,6 +1,6 @@
 class Product < ApplicationRecord
   # Validations
-  validates :name, presence: true, uniqueness: true
+  validates :name, presence: true
   validates :description, presence: true
   validates :price, presence: true, numericality: { greater_than: 0 }
   validates :inventory_quantity, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -21,7 +21,7 @@ class Product < ApplicationRecord
   # If insufficient inventory, raises an error.
   #
   # @param quantity [Integer] Amount to decrement
-  # @raise [ActiveRecord::RecordInvalid] if insufficient inventory
+  # @raise [InsufficientInventoryError] if insufficient inventory
   # @return [void]
   def decrement_inventory!(quantity)
     rows_updated = self.class.where(id: id)
@@ -30,7 +30,7 @@ class Product < ApplicationRecord
     
     if rows_updated == 0
       reload
-      raise ActiveRecord::RecordInvalid, "Insufficient inventory. Available: #{inventory_quantity}, Requested: #{quantity}"
+      raise InsufficientInventoryError.new(name, inventory_quantity, quantity)
     end
     
     reload
