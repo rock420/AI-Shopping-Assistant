@@ -10,7 +10,7 @@ RSpec.describe 'Api::Baskets', type: :request do
       basket = Basket.create!(session_id: session_id)
       BasketItem.create!(basket: basket, product: product1, quantity: 2, price_at_addition: product1.price)
 
-      get "/api/baskets/#{session_id}"
+      get "/api/baskets/#{session_id}", headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -22,7 +22,7 @@ RSpec.describe 'Api::Baskets', type: :request do
 
   describe 'POST /api/baskets/:session_id/items' do
     it 'adds item to basket' do
-      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 3 }
+      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 3 }, headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:created)
       json = JSON.parse(response.body)
@@ -34,25 +34,25 @@ RSpec.describe 'Api::Baskets', type: :request do
       basket = Basket.create!(session_id: session_id)
       BasketItem.create!(basket: basket, product: product1, quantity: 2, price_at_addition: product1.price)
 
-      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 3 }
+      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 3 }, headers: { 'Accept' => 'application/json' }
 
       json = JSON.parse(response.body)
       expect(json['items'][0]['quantity']).to eq(5)
     end
 
     it 'returns error with insufficient inventory' do
-      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 150 }
+      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 150 }, headers: { 'Accept' => 'application/json' }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json['error']).to include('Insufficient inventory')
       expect(json['available']).to eq(100)
     end
 
     it 'returns error for invalid quantity' do
-      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 0 }
+      post "/api/baskets/#{session_id}/items", params: { product_id: product1.id, quantity: 0 }, headers: { 'Accept' => 'application/json' }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json['error']).to include('Quantity must be greater than 0')
     end
@@ -63,7 +63,7 @@ RSpec.describe 'Api::Baskets', type: :request do
       basket = Basket.create!(session_id: session_id)
       BasketItem.create!(basket: basket, product: product1, quantity: 5, price_at_addition: product1.price)
 
-      patch "/api/baskets/#{session_id}/items/#{product1.id}", params: { quantity: 8 }
+      patch "/api/baskets/#{session_id}/items/#{product1.id}", params: { quantity: 8 }, headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -73,9 +73,9 @@ RSpec.describe 'Api::Baskets', type: :request do
     it 'returns error when item not in basket' do
       Basket.create!(session_id: session_id)
 
-      patch "/api/baskets/#{session_id}/items/#{product2.id}", params: { quantity: 5 }
+      patch "/api/baskets/#{session_id}/items/#{product2.id}", params: { quantity: 5 }, headers: { 'Accept' => 'application/json' }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json['error']).to include('Item not in basket')
     end
@@ -87,7 +87,7 @@ RSpec.describe 'Api::Baskets', type: :request do
       BasketItem.create!(basket: basket, product: product1, quantity: 3, price_at_addition: product1.price)
       BasketItem.create!(basket: basket, product: product2, quantity: 2, price_at_addition: product2.price)
 
-      delete "/api/baskets/#{session_id}/items/#{product1.id}"
+      delete "/api/baskets/#{session_id}/items/#{product1.id}", headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -99,7 +99,7 @@ RSpec.describe 'Api::Baskets', type: :request do
       basket = Basket.create!(session_id: session_id)
       BasketItem.create!(basket: basket, product: product1, quantity: 5, price_at_addition: product1.price)
 
-      delete "/api/baskets/#{session_id}/items/#{product1.id}", params: { quantity: 2 }
+      delete "/api/baskets/#{session_id}/items/#{product1.id}", params: { quantity: 2 }, headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -110,7 +110,7 @@ RSpec.describe 'Api::Baskets', type: :request do
       basket = Basket.create!(session_id: session_id)
       BasketItem.create!(basket: basket, product: product1, quantity: 3, price_at_addition: product1.price)
 
-      delete "/api/baskets/#{session_id}/items/#{product1.id}", params: { quantity: 5 }
+      delete "/api/baskets/#{session_id}/items/#{product1.id}", params: { quantity: 5 }, headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -120,9 +120,9 @@ RSpec.describe 'Api::Baskets', type: :request do
     it 'returns error when item not in basket' do
       Basket.create!(session_id: session_id)
 
-      delete "/api/baskets/#{session_id}/items/#{product1.id}"
+      delete "/api/baskets/#{session_id}/items/#{product1.id}", headers: { 'Accept' => 'application/json' }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       json = JSON.parse(response.body)
       expect(json['error']).to eq('Item not in basket')
     end
@@ -133,7 +133,7 @@ RSpec.describe 'Api::Baskets', type: :request do
       basket = Basket.create!(session_id: session_id)
       BasketItem.create!(basket: basket, product: product1, quantity: 3, price_at_addition: product1.price)
 
-      delete "/api/baskets/#{session_id}"
+      delete "/api/baskets/#{session_id}", headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)

@@ -1,7 +1,7 @@
 class InsufficientInventoryError < StandardError
-  attr_reader :product, :available, :requested
+  attr_reader :product_name, :available, :requested
 
-  # @param product [Product] The product with insufficient inventory
+  # @param product_name [String] The product with insufficient inventory
   # @param available [Integer] Current available inventory quantity
   # @param requested [Integer] Quantity that was requested
   def initialize(product_name, available, requested)

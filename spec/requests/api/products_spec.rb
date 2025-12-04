@@ -22,7 +22,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'returns all available products with pagination' do
-      get '/api/products'
+      get '/api/products', headers: { 'Accept' => 'application/json' }
       
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -40,7 +40,7 @@ RSpec.describe 'Api::Products', type: :request do
         product_attributes: { color: 'black' }
       )
       
-      get '/api/products'
+      get '/api/products', headers: { 'Accept' => 'application/json' }
       json = JSON.parse(response.body)
       
       expect(json['products'].length).to eq(2)
@@ -60,7 +60,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'returns the product' do
-      get "/api/products/#{product.id}"
+      get "/api/products/#{product.id}", headers: { 'Accept' => 'application/json' }
       
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
@@ -73,7 +73,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'returns 404 for non-existent product' do
-      get '/api/products/99999'
+      get '/api/products/99999', headers: { 'Accept' => 'application/json' }
       
       expect(response).to have_http_status(:not_found)
       expect(JSON.parse(response.body)['error']).to eq('Product not found')
@@ -108,7 +108,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'searches by text query' do
-      get '/api/products/search', params: { query: 'shirt' }
+      get '/api/products/search', params: { query: 'shirt' }, headers: { 'Accept' => 'application/json' }
       
       json = JSON.parse(response.body)
       expect(json['products'].length).to eq(2)
@@ -116,7 +116,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'filters by price range' do
-      get '/api/products/search', params: { min_price: 30, max_price: 100 }
+      get '/api/products/search', params: { min_price: 30, max_price: 100 }, headers: { 'Accept' => 'application/json' }
       
       json = JSON.parse(response.body)
       expect(json['products'].length).to eq(1)
@@ -124,7 +124,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'filters by JSONB attributes' do
-      get '/api/products/search', params: { color: 'red', size: 'medium' }
+      get '/api/products/search', params: { color: 'red', size: 'medium' }, headers: { 'Accept' => 'application/json' }
       
       json = JSON.parse(response.body)
       expect(json['products'].length).to eq(2)
@@ -132,7 +132,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'applies combined filters' do
-      get '/api/products/search', params: { color: 'red', max_price: 100, query: 'shirt' }
+      get '/api/products/search', params: { color: 'red', max_price: 100, query: 'shirt' }, headers: { 'Accept' => 'application/json' }
       
       json = JSON.parse(response.body)
       expect(json['products'].length).to eq(1)
@@ -140,7 +140,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'returns empty array when no results match' do
-      get '/api/products/search', params: { color: 'purple' }
+      get '/api/products/search', params: { color: 'purple' }, headers: { 'Accept' => 'application/json' }
       
       json = JSON.parse(response.body)
       expect(json['products']).to eq([])
@@ -148,7 +148,7 @@ RSpec.describe 'Api::Products', type: :request do
     end
     
     it 'is case insensitive for attribute filters' do
-      get '/api/products/search', params: { color: 'RED' }
+      get '/api/products/search', params: { color: 'RED' }, headers: { 'Accept' => 'application/json' }
       
       json = JSON.parse(response.body)
       expect(json['products'].length).to eq(2)

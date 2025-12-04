@@ -1,66 +1,30 @@
 class Api::ProductsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:index, :show, :search]
-  
+  include Pagy::Method
+
   # GET /api/products
   def index
-    page = params[:page]&.to_i || 1
     per_page = params[:per_page]&.to_i || 20
     per_page = [per_page, 100].min # Cap at 100 items per page
     
-    products = Product.available.order(created_at: :desc)
-    
-    total_count = products.count
-    total_pages = (total_count.to_f / per_page).ceil
-    
-    # paginated results
-    paginated_products = products.limit(per_page).offset((page - 1) * per_page)
-    
-    render json: {
-      products: paginated_products.as_json(only: [:id, :name, :description, :price, :inventory_quantity, :product_attributes]),
-      pagination: {
-        current_page: page,
-        per_page: per_page,
-        total_count: total_count,
-        total_pages: total_pages
-      }
-    }
+    @pagy, @products = pagy(Product.available.order(created_at: :desc), limit: per_page, page: params[:page])
   end
   
   # GET /api/products/:id
   def show
-    product = Product.find(params[:id])
-    
-    render json: {
-      product: product.as_json(only: [:id, :name, :description, :price, :inventory_quantity, :product_attributes])
-    }
+    @product = Product.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { error: 'Product not found' }, status: :not_found
   end
   
   # GET /api/products/search
   def search
-    filters = build_search_filters
-    products = ProductSearchService.new.search(filters)
+    @filters = build_search_filters
+    products = ProductSearchService.new.search(@filters)
     
-    page = params[:page]&.to_i || 1
     per_page = params[:per_page]&.to_i || 20
     per_page = [per_page, 100].min
     
-    total_count = products.count
-    total_pages = (total_count.to_f / per_page).ceil
-    
-    paginated_products = products.limit(per_page).offset((page - 1) * per_page)
-    
-    render json: {
-      products: paginated_products.as_json(only: [:id, :name, :description, :price, :inventory_quantity, :product_attributes]),
-      filters_applied: filters,
-      pagination: {
-        current_page: page,
-        per_page: per_page,
-        total_count: total_count,
-        total_pages: total_pages
-      }
-    }
+    @pagy, @products = pagy(products, limit: per_page, page: params[:page])
   end
   
   private

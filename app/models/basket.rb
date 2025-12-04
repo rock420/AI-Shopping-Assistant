@@ -40,9 +40,10 @@ class Basket < ApplicationRecord
   #
   # @param product [Product] The product to remove
   # @param quantity [Integer, nil] Quantity to remove (nil = remove all)
+  # @param basket_item [BasketItem, nil] Optional pre-fetched basket item to avoid duplicate query
   # @return [Boolean] true if item was found and removed/updated, false if not found
-  def remove_product(product, quantity = nil)
-    basket_item = basket_items.find_by(product: product)
+  def remove_product(product, quantity = nil, basket_item=nil)
+    basket_item ||= basket_items.find_by(product: product)
     return false unless basket_item
 
     if quantity.nil? || basket_item.quantity <= quantity

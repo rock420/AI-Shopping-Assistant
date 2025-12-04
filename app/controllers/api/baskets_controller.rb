@@ -5,7 +5,6 @@ module Api
 
     # GET /api/baskets/:session_id
     def show
-      render json: basket_response(@basket)
     end
 
     # POST /api/baskets/:session_id/items
@@ -14,16 +13,16 @@ module Api
 
       BasketService.add_item(@basket, @product, quantity)
 
-      render json: basket_response(@basket), status: :created
+      render :show, status: :created
     rescue ActiveRecord::RecordNotFound
       render json: { error: 'Product not found' }, status: :not_found
     rescue InsufficientInventoryError => e
       render json: { 
         error: e.message, 
         available: e.available 
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     rescue ArgumentError => e
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: { error: e.message }, status: :unprocessable_content
     end
 
     # PATCH /api/baskets/:session_id/items/:product_id
@@ -32,14 +31,14 @@ module Api
 
       BasketService.update_item_quantity(@basket, @product, new_quantity)
 
-      render json: basket_response(@basket)
+      render :show
     rescue InsufficientInventoryError => e
       render json: { 
         error: e.message, 
         available: e.available 
-      }, status: :unprocessable_entity
+      }, status: :unprocessable_content
     rescue ArgumentError => e
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: { error: e.message }, status: :unprocessable_content
     end
 
     # DELETE /api/baskets/:session_id/items/:product_id
@@ -49,16 +48,16 @@ module Api
 
       BasketService.remove_item(@basket, @product, quantity)
 
-      render json: basket_response(@basket)
+      render :show
     rescue ArgumentError => e
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: { error: e.message }, status: :unprocessable_content
     end
 
     # DELETE /api/baskets/:session_id
     def destroy
       BasketService.clear_basket(@basket)
 
-      render json: basket_response(@basket)
+      render :show
     end
 
     private
@@ -72,23 +71,6 @@ module Api
       @product = Product.find(params[:product_id])
     rescue ActiveRecord::RecordNotFound
       render json: { error: 'Product not found' }, status: :not_found
-    end
-
-    def basket_response(basket)
-      {
-        session_id: basket.session_id,
-        items: basket.basket_items.includes(:product).map do |item|
-          {
-            product_id: item.product.id,
-            product_name: item.product.name,
-            quantity: item.quantity,
-            price: item.price_at_addition,
-            line_total: item.line_total
-          }
-        end,
-        total: basket.total_price,
-        updated_at: basket.updated_at
-      }
     end
   end
 end

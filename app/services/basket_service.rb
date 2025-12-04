@@ -33,8 +33,10 @@ class BasketService
   # @raise [ArgumentError] if item not in basket
   # @return [void]
   def self.remove_item(basket, product, quantity = nil)
-    removed = basket.remove_product(product, quantity)
-    raise ArgumentError, 'Item not in basket' unless removed
+    existing_item = basket.basket_items.find_by(product: product)
+    raise ArgumentError, 'Item not in basket' unless existing_item
+
+    removed = basket.remove_product(product, quantity, existing_item)
   end
 
   # Validates that sufficient inventory is available for the requested quantity.
