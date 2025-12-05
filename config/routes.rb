@@ -27,5 +27,13 @@ Rails.application.routes.draw do
     delete 'baskets/:session_id/items/:product_id', to: 'baskets#destroy_item'
     delete 'baskets/:session_id', to: 'baskets#destroy'
 
+    # Orders routes
+    resources :orders, only: [:create, :show], param: :order_number
+
+    # Webhook routes
+    namespace :webhooks do
+      post 'payments', to: 'payments#create'
+    end
+
   end
 end

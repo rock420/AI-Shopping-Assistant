@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_12_000006) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_12_162608) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,8 +62,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_12_000006) do
     t.string "status", default: "payment_pending", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "expires_at"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["session_id"], name: "index_orders_on_session_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.string "payment_id", null: false
+    t.string "status", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.string "payment_method"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["payment_id"], name: "index_payments_on_payment_id", unique: true
   end
 
   create_table "products", force: :cascade do |t|
@@ -85,4 +99,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_12_000006) do
   add_foreign_key "basket_items", "products", on_delete: :restrict
   add_foreign_key "order_items", "orders", on_delete: :cascade
   add_foreign_key "order_items", "products", on_delete: :restrict
+  add_foreign_key "payments", "orders"
 end
