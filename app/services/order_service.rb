@@ -89,7 +89,7 @@ class OrderService
       end
     end
 
-    begin:
+    begin
       # Clear the basket associated with this order
       basket = Basket.find_by(session_id: order.session_id)
       basket&.basket_items&.delete_all

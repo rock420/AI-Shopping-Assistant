@@ -6,7 +6,7 @@ class Api::ProductsController < ApplicationController
     per_page = params[:per_page]&.to_i || 20
     per_page = [per_page, 100].min # Cap at 100 items per page
     
-    @pagy, @products = pagy(Product.available.order(created_at: :desc), limit: per_page, page: params[:page])
+    @pagy, @products = pagy(Product.available.order(created_at: :desc), offset: per_page, page: params[:page])
   end
   
   # GET /api/products/:id
@@ -24,7 +24,7 @@ class Api::ProductsController < ApplicationController
     per_page = params[:per_page]&.to_i || 20
     per_page = [per_page, 100].min
     
-    @pagy, @products = pagy(products, limit: per_page, page: params[:page])
+    @pagy, @products = pagy(products, offset: per_page, page: params[:page])
   end
   
   private

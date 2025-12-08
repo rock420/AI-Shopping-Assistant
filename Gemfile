@@ -19,9 +19,9 @@ gem "cssbundling-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 # Pagination [https://github.com/ddnexus/pagy]
-gem "pagy"
-# Full-text search [https://github.com/Casecommons/pg_search]
-gem "pg_search"
+gem "pagy", "~> 6.0"
+# Official OpenAI Ruby SDK [https://github.com/openai/openai-ruby]
+gem "openai", "~> 0.37.0"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

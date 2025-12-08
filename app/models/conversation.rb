@@ -1,7 +1,13 @@
 class Conversation < ApplicationRecord
   # Validations
   validates :session_id, presence: true
-  validates :messages, presence: true
+  validate :messages_must_be_array
+
+  def messages_must_be_array
+    unless messages.is_a?(Array)
+      errors.add(:messages, "must be an array")
+    end
+  end
 
   # Scopes
   scope :for_session, ->(session_id) { where(session_id: session_id) }

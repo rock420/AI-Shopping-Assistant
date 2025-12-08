@@ -35,5 +35,13 @@ Rails.application.routes.draw do
       post 'payments', to: 'payments#create'
     end
 
+    # Conversations routes
+
+    resources :conversations, only: [:create, :show, :destroy], param: :conversation_id do
+      member do
+        post :messages, to: 'conversations#send_message'
+      end
+    end
+    
   end
 end
