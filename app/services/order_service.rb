@@ -17,11 +17,11 @@ class OrderService
 
     ActiveRecord::Base.transaction do
       # Load basket items once with products
-      basket_items = basket.basket_items.includes(:product).to_a
+      basket_items = basket.basket_items.includes(:product).order(:product_id)
 
-      # validate inventory for all items
+      # reserve inventory for all items
       basket_items.each do |basket_item|
-        validate_inventory(basket_item.product, basket_item.quantity)
+        basket_item.product.reserve_inventory!(basket_item.quantity)
       end
 
       # Calculate total
@@ -60,24 +60,41 @@ class OrderService
   # @raise [ActiveRecord::RecordInvalid] if validation fails
   def self.confirm_order(order)
     raise ArgumentError, 'Order cannot be nil' if order.nil?
-    raise ArgumentError, 'Order must be pending' unless order.status == 'pending'
+    if order.status == 'completed'
+          Rails.logger.info "Order #{order.order_number} already completed"
+          return order
+    end
     raise OrderExpiredError.new(order) if order.expired?
+    raise ArgumentError, 'Order must be pending' unless order.status == 'pending'
 
     ActiveRecord::Base.transaction do
-      # Load order items with products
-      order_items = order.order_items.includes(:product).to_a
-
-      # Deduct inventory atomically for all items
-      order_items.each do |order_item|
-        order_item.product.decrement_inventory!(order_item.quantity)
+      # Atomic check-and-update: Only update status if currently pending
+      updated = order.mark_as_completed!
+      
+      unless updated
+        if order.status == 'completed'
+          Rails.logger.info "Order #{order.order_number} already completed"
+          return order
+        else
+          raise ArgumentError, "Cannot confirm order #{order.order_number} with status: #{order.status}"
+        end
       end
 
-      # Update order status to completed
-      order.update!(status: 'completed')
+      # Load order items with products
+      order_items = order.order_items.includes(:product).order(:product_id)
 
+      # Fulfill reserved inventory atomically for all items
+      order_items.each do |order_item|
+        order_item.product.fulfill_reserved_inventory!(order_item.quantity)
+      end
+    end
+
+    begin:
       # Clear the basket associated with this order
       basket = Basket.find_by(session_id: order.session_id)
       basket&.basket_items&.delete_all
+    rescue => e
+      Rails.logger.error "Failed to clear basket for order #{order.order_number}: #{e.message}"
     end
 
     order
@@ -90,9 +107,34 @@ class OrderService
   # @raise [ActiveRecord::RecordInvalid] if validation fails
   def self.cancel_order(order)
     raise ArgumentError, 'Order cannot be nil' if order.nil?
+    if order.status == 'cancelled'
+      Rails.logger.info "Order #{order.order_number} already cancelled"
+      return order
+    end
     raise ArgumentError, 'Only pending orders can be cancelled' unless order.status == 'pending'
 
-    order.update!(status: 'cancelled')
+    ActiveRecord::Base.transaction do
+      # Atomic check-and-update: Only update status if currently pending
+      updated = order.mark_as_cancelled!
+      
+      unless updated
+        if order.status == 'cancelled'
+          Rails.logger.info "Order #{order.order_number} already cancelled"
+          return order
+        else
+          raise ArgumentError, "Cannot cancel order #{order.order_number} with status: #{order.status}"
+        end
+      end
+
+      # Load order items with products
+      order_items = order.order_items.includes(:product).order(:product_id)
+
+      # release reserve inventory atomically for all items
+      order_items.each do |order_item|
+        order_item.product.release_inventory!(order_item.quantity)
+      end
+    end
+
     order
   end
 

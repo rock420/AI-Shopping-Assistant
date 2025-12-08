@@ -26,15 +26,26 @@ class Order < ApplicationRecord
     status == 'pending' && expires_at.present? && expires_at < Time.current
   end
 
-  # Cancels all expired pending orders (will be invoke periodically by some cron job)
+  # Atomically marks order as completed if currently pending
   #
-  # @return [Integer] Number of orders cancelled
-  def self.cancel_expired_orders
-    expired_orders = expired.to_a
-    expired_orders.each do |order|
-      order.update(status: 'cancelled')
-    end
-    expired_orders.count
+  # @return [Boolean] true if status was updated, false if already completed/cancelled
+  def mark_as_completed!
+    rows_updated = self.class.where(id: id, status: 'pending')
+                       .update_all(status: 'completed')
+    
+    reload
+    rows_updated > 0
+  end
+
+  # Atomically marks order as cancelled if currently pending
+  #
+  # @return [Boolean] true if status was updated, false if already completed/cancelled
+  def mark_as_cancelled!
+    rows_updated = self.class.where(id: id, status: 'pending')
+                       .update_all(status: 'cancelled')
+    
+    reload
+    rows_updated > 0
   end
 
   private

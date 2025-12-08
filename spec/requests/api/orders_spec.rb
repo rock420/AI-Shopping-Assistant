@@ -78,35 +78,28 @@ RSpec.describe 'Api::Orders', type: :request do
       expect(basket.basket_items.count).to eq(2)
     end
 
-    it 'allows concurrent pending orders since inventory not deducted yet' do
+    it 'reserves inventory when creating pending orders' do
       basket1 = Basket.create!(session_id: 'session-1')
       BasketItem.create!(basket: basket1, product: product3, quantity: 3, price_at_addition: product3.price)
 
       basket2 = Basket.create!(session_id: 'session-2')
-      BasketItem.create!(basket: basket2, product: product3, quantity: 3, price_at_addition: product3.price)
+      BasketItem.create!(basket: basket2, product: product3, quantity: 2, price_at_addition: product3.price)
 
-      threads = []
-      results = []
-
-      threads << Thread.new do
-        post '/api/orders', params: { session_id: 'session-1' }, headers: { 'Accept' => 'application/json' }
-        results << { status: response.status }
-      end
-
-      threads << Thread.new do
-        post '/api/orders', params: { session_id: 'session-2' }, headers: { 'Accept' => 'application/json' }
-        results << { status: response.status }
-      end
-
-      threads.each(&:join)
-
-      # Both should succeed since we're only creating pending orders
-      success_count = results.count { |r| r[:status] == 201 }
-      expect(success_count).to eq(2)
+      # First order reserves 3 units
+      post '/api/orders', params: { session_id: 'session-1' }, headers: { 'Accept' => 'application/json' }
+      expect(response).to have_http_status(:created)
       
-      # Inventory not deducted yet
       product3.reload
-      expect(product3.inventory_quantity).to eq(5)
+      expect(product3.inventory_quantity).to eq(5)  # Not deducted yet
+      expect(product3.reserved_quantity).to eq(3)   # But reserved
+      
+      # Second order reserves 2 more units
+      post '/api/orders', params: { session_id: 'session-2' }, headers: { 'Accept' => 'application/json' }
+      expect(response).to have_http_status(:created)
+      
+      product3.reload
+      expect(product3.inventory_quantity).to eq(5)  # Still not deducted
+      expect(product3.reserved_quantity).to eq(5)   # All reserved now
     end
   end
 
