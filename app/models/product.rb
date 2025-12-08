@@ -1,4 +1,6 @@
 class Product < ApplicationRecord
+  include PgSearch::Model
+
   # Validations
   validates :name, presence: true
   validates :description, presence: true
@@ -12,6 +14,16 @@ class Product < ApplicationRecord
 
   # Scopes
   scope :available, -> { where('inventory_quantity > 0') }
+
+  pg_search_scope :search_product,
+                  against: { name: 'A', description: 'B' },
+                  using: {
+                    tsearch: {
+                      dictionary: 'english',
+                      tsvector_column: 'ts_vector',
+                    }
+                  },
+                  ranked_by: ':tsearch'
 
   # Instance methods
   def available?

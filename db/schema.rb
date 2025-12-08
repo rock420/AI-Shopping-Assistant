@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_08_104651) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_08_223725) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -89,9 +89,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_08_104651) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "reserved_quantity", default: 0, null: false
+    t.virtual "ts_vector", type: :tsvector, as: "(setweight(to_tsvector('english'::regconfig, (COALESCE(name, ''::character varying))::text), 'A'::\"char\") || setweight(to_tsvector('english'::regconfig, COALESCE(description, ''::text)), 'B'::\"char\"))", stored: true
     t.index ["inventory_quantity"], name: "index_products_on_inventory_quantity", where: "(inventory_quantity > 0)"
-    t.index ["name"], name: "index_products_on_name", unique: true
     t.index ["product_attributes"], name: "index_products_on_attributes", using: :gin
+    t.index ["ts_vector"], name: "index_products_on_ts_vector", using: :gin
     t.check_constraint "inventory_quantity >= 0", name: "products_inventory_non_negative"
     t.check_constraint "price > 0::numeric", name: "products_price_positive"
   end

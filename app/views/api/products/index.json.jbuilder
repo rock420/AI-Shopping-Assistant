@@ -9,9 +9,9 @@ end
 
 json.pagination do
   json.current_page @pagy.page
-  json.per_page @pagy.limit
+  json.per_page @pagy.offset
   json.total_count @pagy.count
   json.total_pages @pagy.pages
-  json.prev_page @pagy.previous
+  json.prev_page @pagy.prev
   json.next_page @pagy.next
 end

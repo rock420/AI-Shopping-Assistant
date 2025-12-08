@@ -1,5 +1,5 @@
 class Api::ProductsController < ApplicationController
-  include Pagy::Method
+  include Pagy::Backend
 
   # GET /api/products
   def index

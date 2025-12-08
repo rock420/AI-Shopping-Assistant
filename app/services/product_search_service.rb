@@ -27,11 +27,7 @@ class ProductSearchService
   # @return [ActiveRecord::Relation] Filtered products
   def apply_text_search(products, query)
     return products if query.blank?
-    
-    products.where(
-      'name ILIKE :query OR description ILIKE :query',
-      query: "%#{ActiveRecord::Base.sanitize_sql_like(query)}%"
-    )
+    products.search_product(query)
   end
   
   # Applies price range filtering
