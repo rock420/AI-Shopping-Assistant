@@ -53,21 +53,54 @@ class RouterAgent
   def build_classifier
     system_prompt = <<~PROMPT
       You are a message classifier for an e-commerce shopping assistant.
-      Your job is to analyze the last few messages of a conversation and correctly determine which specialized agent should handle them.
-      Emphasize on the latest user's message.
+      Your job is to analyze the user's message and conversation context to determine which specialized agent should handle it.
       
       Available agents:
-      1. cart_management - Handles shopping cart operations (add, remove, view basket, update quantities, checkout, order)
-      2. product_search - Handles product discovery (search, filter, view details, recommendations)
+      1. product_search - Handles product discovery (search, filter, view details, recommendations)
+      2. cart_management - Handles cart operations (add, remove, view basket, update quantities, checkout, order)
       3. general_conversation - Handles greetings, policies, support questions, general chat
       
-      Classification rules:
-      - If the message is about adding, removing, viewing, or managing items in the cart/basket/order → cart_management
-      - If the message is about finding, searching, browsing, or viewing products → product_search
-      - If the message is about policies, shipping, returns, support, or general questions → general_conversation
-      - If the message is a greeting or casual conversation → general_conversation
+      CONTEXT-AWARE ROUTING (CRITICAL):
+      - Pay close attention to conversation history.
+      - Analyze and reason which agent will be best to handle the user query based on the conversation history and current message.
+      - Break down complex queries to simpler steps and check at which step the user is and then route to the appropiate agent.
+      - If the user needs to FIND or SEARCH for products they don't have yet, ALWAYS route to product_search FIRST.
+      - The user MUST see product options before they can add anything to cart.
       
-      Respond with **ONLY** the agent name: cart_management, product_search, or general_conversation
+      Route to PRODUCT_SEARCH when:
+      - User mentions finding, searching, browsing, or discovering products
+      - Keywords: "find", "search", "show me", "looking for", "I want", "I need", "get me", "do you have"
+      - Price/attribute filters: "under $X", "red", "size M", "cheap", etc.
+      - Complex queries with search intent
+      - Examples:
+        * "Show me red shoes"
+        * "Find laptops under $1000"
+        * "I'm looking for a blue dress"
+      
+      Route to CART_MANAGEMENT when:
+      - User wants to manage cart/basket or checkout
+      - ONLY if they're referencing products they've already seen OR managing existing cart
+      - Keywords: "add to cart" (when product is already known), "remove", "basket", "checkout", "place order"
+      - Context-aware examples (AFTER seeing products):
+        * "Add the first one"
+        * "Add this to cart"
+        * "I'll take it"
+        * "Show my basket"
+        * "Checkout"
+        * "Remove item 5"
+      
+      Route to GENERAL_CONVERSATION when:
+      - If the message is about policies, returns, support, or general questions
+      - Examples: "Hello!", "What's your return policy?", "How do I track my order?", "Can you help me?"
+      
+      DECISION LOGIC:
+      1. Does the message contain search/find related intent → product_search
+      2. Is the user asking to see products they haven't seen yet? → product_search
+      3. Is the user referencing products from previous conversation? → Check context
+      4. Is it about cart/checkout with products already known? → cart_management
+      5. Is it a greeting or policy question? → general_conversation
+      
+      Respond with **ONLY** the agent name: product_search, cart_management, or general_conversation
     PROMPT
     
     Agent.new(system_prompt: system_prompt, tools: [])
@@ -85,13 +118,17 @@ class RouterAgent
     context_str = build_context_string(context)
     
     prompt = <<~PROMPT
-      CONTEXT:
-      #{context_str}
-      
-      User message: "#{message}"
-      
-      Which agent should handle this? Respond with ONLY: cart_management, product_search, or general_conversation
-    PROMPT
+        CONVERSATION CONTEXT:
+        #{context_str}
+        
+        CURRENT USER MESSAGE: "#{message}"
+        
+        Analyze the conversation context and the current message carefully.
+        If the user is referencing something from the previous conversation (like "add this", "the first one"), consider the context.
+        
+        Which agent should handle this message?
+        Respond with ONLY ONE of: cart_management, product_search, or general_conversation
+      PROMPT
     
     result = @classifier.run(prompt)
     parse_classification_result(result[:content])
@@ -100,8 +137,11 @@ class RouterAgent
   def build_context_string(context)
     return "" unless context[:messages]&.any?
     
-    recent = context[:messages].last(5)
-    "Recent conversation:\n" + recent.map { |m| "#{m['role']}: #{m['content']}" }.join("\n")
+    recent = context[:messages].last(10)
+    "Recent conversation:\n" + recent.map { |m| 
+      name_part = m['name'].present? ? " (#{m['name']})" : ""
+      "#{m['role']}#{name_part}: #{m['content']}"
+    }.join("\n")
   end
 
   # Parse the classification result from LLM response
