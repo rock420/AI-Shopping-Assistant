@@ -136,7 +136,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
     }
 
     return (
-        <div className="bg-white rounded-lg shadow flex flex-col h-[600px]">
+        <div className="bg-white rounded-lg shadow flex flex-col h-[600px] md:h-[calc(100vh-4rem)] md:max-h-[900px]">
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Chat Assistant</h2>
@@ -158,7 +158,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
 
             {/* Messages */}
             <div className="flex-1 overflow-hidden">
-                <MessageList messages={messages} />
+                <MessageList messages={messages} onBasketUpdate={onBasketUpdate} />
             </div>
 
             {/* Input */}

@@ -74,10 +74,15 @@ class BasketService
   # @raise [InsufficientInventoryError] if insufficient inventory
   # @raise [ArgumentError] if item not in basket
   def self.update_item_quantity(basket, product, new_quantity)
-    raise ArgumentError, 'Quantity must be greater than 0' if new_quantity <= 0
+    raise ArgumentError, 'Quantity can not be negative' if new_quantity < 0
 
     basket_item = basket.basket_items.find_by(product_id: product.id)
     raise ArgumentError, 'Item not in basket' unless basket_item
+
+    if new_quantity == 0
+      basket_item.destroy!
+      return basket_item
+    end
 
     # Validate inventory for the new quantity
     validate_inventory(product, new_quantity)

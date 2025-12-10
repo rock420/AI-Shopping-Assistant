@@ -5,9 +5,10 @@ import { Message } from '../types/message';
 
 interface MessageListProps {
     messages: Message[];
+    onBasketUpdate?: () => void;
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+const MessageList: React.FC<MessageListProps> = ({ messages, onBasketUpdate }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to latest message
@@ -75,6 +76,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages }) => {
                         content={message.content}
                         timestamp={message.timestamp}
                         uiContext={message.uiContext}
+                        onBasketUpdate={onBasketUpdate}
                     />
                 )
             ))}
