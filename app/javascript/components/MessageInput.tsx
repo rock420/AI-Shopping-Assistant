@@ -54,10 +54,10 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
                         placeholder={disabled ? "Please wait..." : "Type your message..."}
                         disabled={disabled}
                         rows={1}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-2 pr-4 md:pr-64 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                         style={{ maxHeight: '120px' }}
                     />
-                    <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+                    <div className="hidden md:block absolute bottom-2 right-2 text-xs text-gray-400 pointer-events-none">
                         {!disabled && 'Press Enter to send, Shift+Enter for new line'}
                     </div>
                 </div>
