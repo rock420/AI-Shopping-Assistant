@@ -56,14 +56,14 @@ class CartAgent
       - Call the render_ui tool as your FINAL action before responding to the user
       - The render_ui tool determines what visual component the user sees
       - Set 'action' to the appropriate UI view:
-        * 'show_basket' - for displaying basket contents and items
-        * 'show_order_payment' - REQUIRED after creating an order to show payment page
+        * 'show_basket' - MANDATORY after adding/removing any item or for viewing basket to update UI. NEVER SKIP.
+        * 'show_order_payment' - MANDATORY after creating an order to show payment page. NEVER SKIP.
         * 'show_order_confirmation' - for showing order confirmation after payment
         * 'show_order_details' - for displaying details of an existing order
       - Set 'data_source' to the exact name of the tool that generated the data to display:
         * Use 'view_basket' when showing basket contents
         * Use 'create_order' when showing payment page
-        * Use 'view_order' when showing order details
+        * Use 'view_order' when showing order details or confirmation page
       - Example workflows:
         * Add item: add_item_to_basket → render_ui(action: "show_basket", data_source: "add_item_to_basket") → respond
         * Place order: create_order → render_ui(action: "show_order_payment", data_source: "create_order") → respond
@@ -255,7 +255,7 @@ class CartAgent
     quantity = args["quantity"] || 1
     
     BasketService.add_item(basket, product, quantity)
-    render_basket(basket.reload, "Item added successfully")
+    render_basket(basket.reload, "Item added successfully - UI update require")
   rescue ActiveRecord::RecordNotFound
     { success: false, error: "Product not found", product_id: args["product_id"] }
   rescue InsufficientInventoryError => e
@@ -270,7 +270,7 @@ class CartAgent
     quantity = args["quantity"]
     
     BasketService.remove_item(basket, product, quantity)
-    render_basket(basket.reload, "Item removed successfully")
+    render_basket(basket.reload, "Item removed successfully - UI update require")
   rescue ActiveRecord::RecordNotFound
     { success: false, error: "Product not found", product_id: args["product_id"] }
   rescue ArgumentError => e
@@ -296,7 +296,7 @@ class CartAgent
   def handle_clear_basket(args, context)
     basket = get_basket(context[:session_id])
     BasketService.clear_basket(basket)
-    render_basket(basket.reload, "Basket cleared")
+    render_basket(basket.reload, "Basket cleared - UI update require")
   end
 
   def handle_get_basket_summary(context)
@@ -330,7 +330,7 @@ class CartAgent
     end
     
     order = OrderService.create_from_basket(basket)
-    render_order(order, "Order created successfully")
+    render_order(order, "Order created successfully - Show payment page")
   rescue InsufficientInventoryError => e
     { success: false, error: e.message }
   rescue ActiveRecord::RecordInvalid => e

@@ -12,9 +12,10 @@ interface SystemMessageProps {
     timestamp: Date;
     uiContext?: UIContext;
     onBasketUpdate?: () => void;
+    onPaymentDone?: () => void;
 }
 
-const SystemMessage: React.FC<SystemMessageProps> = ({ content, timestamp, uiContext, onBasketUpdate }) => {
+const SystemMessage: React.FC<SystemMessageProps> = ({ content, timestamp, uiContext, onBasketUpdate, onPaymentDone }) => {
 
     const formatTime = (date: Date): string => {
         return date.toLocaleTimeString('en-US', {
@@ -69,7 +70,7 @@ const SystemMessage: React.FC<SystemMessageProps> = ({ content, timestamp, uiCon
                     return (
                         <OrderPaymentButton
                             order={uiContext.data.order as Order}
-                            onPaymentSuccess={onBasketUpdate}
+                            onPaymentDone={onPaymentDone}
                         />
                     );
                 }

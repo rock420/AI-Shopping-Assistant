@@ -50,7 +50,7 @@ class Agent
   # @return [Hash] Final response with content and tool calls
   def run(prompt, context: {})
     messages = build_initial_messages(prompt, context)
-    context[:messages] << { "role" => "user", "content" => prompt }  if context[:messages]
+    context[:messages] << { "role" => "user", "content" => prompt }  if context[:messages] && !prompt.empty?
     iteration = 0
     
     loop do
@@ -123,7 +123,7 @@ class Agent
   
   def run_stream_internal(prompt, context)
     messages = build_initial_messages(prompt, context)
-    context[:messages] << { "role" => "user", "content" => prompt } if context[:messages]
+    context[:messages] << { "role" => "user", "content" => prompt } if context[:messages] && !prompt.empty?
     
     iteration = 0
     ui_context = nil
@@ -258,7 +258,7 @@ class Agent
     end
     
     # Add user prompt
-    messages << { "role" => "user", "content" => prompt }
+    messages << { "role" => "user", "content" => prompt } if !prompt.empty?
     
     messages
   end

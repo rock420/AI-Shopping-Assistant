@@ -11,25 +11,27 @@ module Api
       # Expected payload:
       # {
       #   "event": "payment.succeeded" | "payment.failed",
-      #   "order_number": "ORD-20250112-ABC123",
       #   "payment_id": "pay_xyz123",
       #   "amount": 99.99,
-      #   "method": "card"
+      #   "method": "card",
+      #   "metadata": {
+      #     "order_number": "ORD-20250112-ABC123",
+      #     "conversation_id": "XXXXXXXX"  # optional 
+      #    }
       # }
       def create
-        payload = params.permit(:event, :order_number, :payment_id, :amount, :method)
-
-        order = Order.find_by(order_number: payload[:order_number])
-
+        payload = params.permit(:event, :payment_id, :amount, :method, metadata: [:order_number, :conversation_id])
+        
+        order = Order.find_by(order_number: payload[:metadata][:order_number])
         if order.nil?
           return render json: { error: 'Order not found' }, status: :not_found
         end
 
         case payload[:event]
         when 'payment.succeeded'
-          PaymentService.process_success(order, payload[:payment_id], payload[:amount], payload[:method])
+          PaymentService.process_success(order, payload[:payment_id], payload[:amount], payload[:method], payload[:metadata])
         when 'payment.failed'
-          PaymentService.process_failure(order,  payload[:payment_id], payload[:amount], payload[:method])
+          PaymentService.process_failure(order,  payload[:payment_id], payload[:amount], payload[:method], payload[:metadata])
         else
           return render json: { error: 'Unknown event type' }, status: :bad_request
         end

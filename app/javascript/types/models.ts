@@ -1,6 +1,7 @@
 /**
  * API Type Definitions
  */
+import type { UIContext } from './actions';
 
 export interface ProductAttributes {
     color?: string;
@@ -51,6 +52,7 @@ export interface Order {
 export interface ConversationMessage {
     role: 'user' | 'assistant';
     content: string;
+    ui_context?: UIContext;
 }
 
 export interface Conversation {
@@ -72,6 +74,11 @@ export interface ProductSearchParams extends PaginationParams {
     size?: string;
     min_price?: number;
     max_price?: number;
+}
+
+export interface PaymentMetadata {
+    order_number:string;
+    conversation_id?: number;
 }
 
 export interface WebhookResponse {

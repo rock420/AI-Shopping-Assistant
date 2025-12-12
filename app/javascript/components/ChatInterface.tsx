@@ -4,6 +4,7 @@ import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import { Message } from '../types/message';
 import { UI_ACTIONS, type UIContext } from '../types/actions';
+import { ConversationProvider } from '../contexts/ConversationContext';
 
 interface ChatInterfaceProps {
     sessionId: string;
@@ -125,7 +126,30 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
         }
     };
 
-    if (!conversationId && !error) {
+    const onPaymentDone = async () => {
+        if (onBasketUpdate) {
+            onBasketUpdate();
+        }
+
+        if (!conversationId) return;
+
+        let conversation = await api.conversations.get(conversationId);
+        let lastMessage = conversation.messages[conversation.messages.length - 1];
+        if (lastMessage.role === 'assistant' && messages[messages.length - 1].content != lastMessage.content) {
+            let assistantMessage: Message = {
+                id: `assistant-${Date.now()}`,
+                role: 'assistant',
+                content: lastMessage.content,
+                timestamp: new Date(),
+            };
+            if (lastMessage.ui_context) {
+                assistantMessage.uiContext = lastMessage.ui_context;
+            }
+            setMessages(prev => [...prev, assistantMessage]);
+        }
+    }
+
+    if (!conversationId) {
         return (
             <div className="bg-white rounded-lg shadow p-6">
                 <div className="flex items-center justify-center h-96">
@@ -136,40 +160,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
     }
 
     return (
-        <div className="bg-white rounded-lg shadow flex flex-col h-[600px] md:h-[calc(100vh-4rem)] md:max-h-[900px]">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Chat Assistant</h2>
-                <button
-                    onClick={handleNewConversation}
-                    className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                    disabled={isLoading}
-                >
-                    New Conversation
-                </button>
-            </div>
-
-            {/* Error message */}
-            {error && (
-                <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p className="text-sm text-red-800">{error}</p>
+        <ConversationProvider conversationId={conversationId}>
+            <div className="bg-white rounded-lg shadow flex flex-col h-[600px] md:h-[calc(100vh-4rem)] md:max-h-[900px]">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">Chat Assistant</h2>
+                    <button
+                        onClick={handleNewConversation}
+                        className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                        disabled={isLoading}
+                    >
+                        New Conversation
+                    </button>
                 </div>
-            )}
 
-            {/* Messages */}
-            <div className="flex-1 overflow-hidden">
-                <MessageList messages={messages} onBasketUpdate={onBasketUpdate} />
-            </div>
+                {/* Error message */}
+                {error && (
+                    <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-sm text-red-800">{error}</p>
+                    </div>
+                )}
 
-            {/* Input */}
-            <div className="border-t border-gray-200">
-                <MessageInput
-                    onSend={handleSendMessage}
-                    disabled={isLoading || !conversationId}
-                    isLoading={isLoading}
-                />
+                {/* Messages */}
+                <div className="flex-1 overflow-hidden">
+                    <MessageList messages={messages} onBasketUpdate={onBasketUpdate} onPaymentDone={onPaymentDone} />
+                </div>
+
+                {/* Input */}
+                <div className="border-t border-gray-200">
+                    <MessageInput
+                        onSend={handleSendMessage}
+                        disabled={isLoading || !conversationId}
+                        isLoading={isLoading}
+                    />
+                </div>
             </div>
-        </div>
+        </ConversationProvider>
     );
 };
 

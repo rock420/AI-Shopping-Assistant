@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import type { Order } from '../types/models';
+import type { Order, PaymentMetadata } from '../types/models';
 import { mockPaymentService, type PaymentMethod, type PaymentResult } from '../services/mockPaymentService';
+import { useConversation } from '../contexts/ConversationContext';
 
 interface OrderPaymentProps {
     order: Order;
@@ -15,6 +16,7 @@ const OrderPayment: React.FC<OrderPaymentProps> = ({
     onPaymentFailure,
     onCancel,
 }) => {
+    const { conversationId } = useConversation();
     const [selectedMethod, setSelectedMethod] = useState<PaymentMethod['type']>('credit_card');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -34,8 +36,12 @@ const OrderPayment: React.FC<OrderPaymentProps> = ({
         };
 
         try {
+            const metadata: PaymentMetadata = {
+                order_number: order.order_number,
+                ...(conversationId !== null && { conversation_id: conversationId }),
+            };
             const result: PaymentResult = await mockPaymentService.processPayment(
-                order.order_number,
+                metadata,
                 order.total_amount,
                 paymentMethod,
                 forceFailure
@@ -84,9 +90,9 @@ const OrderPayment: React.FC<OrderPaymentProps> = ({
     const getPaymentMethodLabel = (method: PaymentMethod) => {
         switch (method.type) {
             case 'credit_card':
-                return `Credit Card ${method.brand ? `(${method.brand})` : ''} : ''}`;
+                return `Credit Card ${method.brand ? `(${method.brand})` : ''}`;
             case 'debit_card':
-                return `Debit Card ${method.brand ? `(${method.brand})` : ''} : ''}`;
+                return `Debit Card ${method.brand ? `(${method.brand})` : ''}`;
             case 'paypal':
                 return 'PayPal';
         }

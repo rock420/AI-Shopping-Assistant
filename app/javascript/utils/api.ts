@@ -14,6 +14,7 @@ import type {
     PaginationParams,
     ProductSearchParams,
     WebhookResponse,
+    PaymentMetadata,
 } from '../types/models';
 
 const API_BASE_URL = '/api';
@@ -236,12 +237,14 @@ const api = {
         /**
          * Create order from basket
          */
-        create: (): Promise<Order> => {
+        create: async (): Promise<Order> => {
             const sessionId = getSessionId();
-            return apiRequest<Order>('/orders', {
+
+            const response = await apiRequest<{ message: string; order: Order }>('/orders', {
                 method: 'POST',
                 body: JSON.stringify({ session_id: sessionId }),
             });
+            return response.order;
         },
 
         /**
@@ -263,6 +266,13 @@ const api = {
                 method: 'POST',
                 body: JSON.stringify({ session_id: sessionId }),
             });
+        },
+
+        /**
+         * Get a conversation by ID
+         */
+        get: (conversationId: number): Promise<Conversation> => {
+            return apiRequest<Conversation>(`/conversations/${conversationId}`);
         },
 
         /**
@@ -345,19 +355,19 @@ const api = {
          * Successful payment webhook
          */
         paymentSuccess: (
-            orderNumber: string,
             paymentId: string,
             amount: number,
-            method: string
+            method: string,
+            metadata: PaymentMetadata
         ): Promise<WebhookResponse> => {
             return apiRequest<WebhookResponse>('/webhooks/payments', {
                 method: 'POST',
                 body: JSON.stringify({
                     event: 'payment.succeeded',
-                    order_number: orderNumber,
                     payment_id: paymentId,
                     amount,
                     method,
+                    metadata
                 }),
             });
         },
@@ -366,19 +376,19 @@ const api = {
          * Simulate a failed payment webhook
          */
         paymentFailure: (
-            orderNumber: string,
             paymentId: string,
             amount: number,
-            method: string
+            method: string,
+            metadata: PaymentMetadata
         ): Promise<WebhookResponse> => {
             return apiRequest<WebhookResponse>('/webhooks/payments', {
                 method: 'POST',
                 body: JSON.stringify({
                     event: 'payment.failed',
-                    order_number: orderNumber,
                     payment_id: paymentId,
                     amount,
                     method,
+                    metadata
                 }),
             });
         },

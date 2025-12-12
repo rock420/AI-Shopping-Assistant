@@ -4,6 +4,7 @@
  */
 
 import api from '../utils/api';
+import { PaymentMetadata } from '../types/models';
 
 export interface PaymentMethod {
     type: 'credit_card' | 'debit_card' | 'paypal';
@@ -38,14 +39,14 @@ const simulateProcessingDelay = (ms: number = 2000): Promise<void> => {
 class MockPaymentService {
     /**
      * Process a payment
-     * @param orderNumber - The order number to process payment for
+     * @param metadata - Metadata related to payment, for eg - order_id
      * @param amount - The payment amount
      * @param paymentMethod - The payment method details
      * @param shouldFail - Force payment to fail (for testing)
      * @returns Payment result
      */
     async processPayment(
-        orderNumber: string,
+        metadata: PaymentMetadata,
         amount: number,
         paymentMethod: PaymentMethod,
         shouldFail: boolean = false
@@ -53,16 +54,16 @@ class MockPaymentService {
         const paymentId = generatePaymentId();
 
         // Simulate processing delay
-        await simulateProcessingDelay(2000);
+        await simulateProcessingDelay(1000);
 
         try {
             if (shouldFail) {
                 // Trigger failure webhook
                 await api.webhooks.paymentFailure(
-                    orderNumber,
                     paymentId,
                     amount,
-                    paymentMethod.type
+                    paymentMethod.type,
+                    metadata
                 );
 
                 return {
@@ -75,10 +76,10 @@ class MockPaymentService {
 
             // Trigger success webhook
             await api.webhooks.paymentSuccess(
-                orderNumber,
                 paymentId,
                 amount,
-                paymentMethod.type
+                paymentMethod.type,
+                metadata
             );
 
             return {
@@ -104,7 +105,7 @@ class MockPaymentService {
     getAvailablePaymentMethods(): PaymentMethod[] {
         return [
             { type: 'credit_card', brand: 'Visa' },
-            { type: 'debit_card', brand: 'Mastercard'},
+            { type: 'debit_card', brand: 'Mastercard' },
             { type: 'paypal' },
         ];
     }
