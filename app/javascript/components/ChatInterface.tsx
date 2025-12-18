@@ -75,7 +75,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
                 setMessages(prev =>
                     prev.map(msg =>
                         msg.id === assistantMessageId
-                            ? { ...msg, content: accumulatedContent }
+                            ? { ...msg, content: accumulatedContent, toolCall: undefined }
                             : msg
                     )
                 );
@@ -93,6 +93,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
                 if (uiContext.action === UI_ACTIONS.SHOW_BASKET) {
                     onBasketUpdate();
                 }
+            },
+            // onToolCall
+            (toolName: string, uiDescriptor?: string) => {
+                setMessages(prev =>
+                    prev.map(msg =>
+                        msg.id === assistantMessageId
+                            ? { ...msg, toolCall: { toolName, uiDescriptor } }
+                            : msg
+                    )
+                );
             },
             // onDone
             () => {

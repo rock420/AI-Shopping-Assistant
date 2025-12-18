@@ -11,11 +11,15 @@ interface SystemMessageProps {
     content: string;
     timestamp: Date;
     uiContext?: UIContext;
+    toolCall?: {
+        toolName: string;
+        uiDescriptor?: string;
+    };
     onBasketUpdate?: () => void;
     onPaymentDone?: () => void;
 }
 
-const SystemMessage: React.FC<SystemMessageProps> = ({ content, timestamp, uiContext, onBasketUpdate, onPaymentDone }) => {
+const SystemMessage: React.FC<SystemMessageProps> = ({ content, timestamp, uiContext, toolCall, onBasketUpdate, onPaymentDone }) => {
 
     const formatTime = (date: Date): string => {
         return date.toLocaleTimeString('en-US', {
@@ -125,7 +129,9 @@ const SystemMessage: React.FC<SystemMessageProps> = ({ content, timestamp, uiCon
                                 <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                                 <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                             </div>
-                            <span className="text-xs text-gray-500">Thinking...</span>
+                            <span className="text-xs text-gray-500">
+                                {toolCall?.uiDescriptor || "Thinking..."}
+                            </span>
                         </div>
                     )}
                 </div>

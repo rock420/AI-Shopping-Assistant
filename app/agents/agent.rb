@@ -33,14 +33,17 @@ class Agent
     @name = name
     @client = self.class.openai_client
     @tool_handlers = {}
+    @tool_ui_descriptor = {}
   end
   
   # Register a tool handler
   #
   # @param tool_name [String] Name of the tool
+  # @param descriptor [String, nil] Optional UI descriptor for the tool
   # @param handler [Proc] Proc that handles tool execution
-  def register_tool(tool_name, &handler)
+  def register_tool(tool_name, descriptor = nil, &handler)
     @tool_handlers[tool_name] = handler
+    @tool_ui_descriptor[tool_name] = descriptor if descriptor
   end
   
   # Run the agent with a user prompt
@@ -215,6 +218,7 @@ class Agent
         yield({
           type: "tool_call",
           tool_name: tool_name,
+          ui_descriptor: @tool_ui_descriptor[tool_name],
           arguments: tool_call.dig("function", "arguments"),
           done: false
         })

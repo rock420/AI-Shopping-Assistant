@@ -283,6 +283,7 @@ const api = {
             message: string,
             onContent: (content: string) => void,
             onUIContext: (uiContext: UIContext) => void,
+            onToolCall: (toolName: string, uiDescriptor?: string) => void,
             onDone: () => void,
             onError: (error: string) => void
         ): (() => void) => {
@@ -314,6 +315,11 @@ const api = {
                             case 'content':
                                 if (data.content) {
                                     onContent(data.content);
+                                }
+                                break;
+                            case 'tool_call':
+                                if (data.tool_name) {
+                                    onToolCall(data.tool_name, data.ui_descriptor);
                                 }
                                 break;
                             case 'render_ui':

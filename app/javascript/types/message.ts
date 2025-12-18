@@ -10,4 +10,8 @@ export interface Message {
     content: string;
     timestamp: Date;
     uiContext?: UIContext;
+    toolCall?: {
+        toolName: string;
+        uiDescriptor?: string;
+    };
 }

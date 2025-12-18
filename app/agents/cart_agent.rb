@@ -233,14 +233,14 @@ class CartAgent
   end
   
   def register_tools
-    @agent.register_tool("view_basket") { |args, context| handle_view_basket(args, context) }
-    @agent.register_tool("add_item_to_basket") { |args, context| handle_add_item_to_basket(args, context) }
-    @agent.register_tool("remove_item_from_basket") { |args, context| remove_item_from_basket(args, context) }
-    @agent.register_tool("update_basket_item") { |args, context| handle_update_basket_item(args, context) }
-    @agent.register_tool("clear_basket") { |args, context| handle_clear_basket(args, context) }
-    @agent.register_tool("get_basket_summary") { |args, context| handle_get_basket_summary(context) }
-    @agent.register_tool("create_order") { |args, context| handle_create_order(context) }
-    @agent.register_tool("view_order") { |args| handle_view_order(args) }
+    @agent.register_tool("view_basket", "Viewing your basket...") { |args, context| handle_view_basket(args, context) }
+    @agent.register_tool("add_item_to_basket", "Adding item to basket...") { |args, context| handle_add_item_to_basket(args, context) }
+    @agent.register_tool("remove_item_from_basket", "Removing item from basket...") { |args, context| remove_item_from_basket(args, context) }
+    @agent.register_tool("update_basket_item", "Updating basket item...") { |args, context| handle_update_basket_item(args, context) }
+    @agent.register_tool("clear_basket", "Clearing your basket...") { |args, context| handle_clear_basket(args, context) }
+    @agent.register_tool("get_basket_summary", "Getting basket summary...") { |args, context| handle_get_basket_summary(context) }
+    @agent.register_tool("create_order", "Creating your order...") { |args, context| handle_create_order(context) }
+    @agent.register_tool("view_order", "Looking up your order...") { |args| handle_view_order(args) }
     @agent.register_tool("render_ui") { |args, context| handle_render_ui(args, context) }
   end
 

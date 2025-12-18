@@ -115,10 +115,10 @@ class ChitchatAgent
   end
   
   def register_tools
-    @agent.register_tool("get_store_policy") { |args| handle_get_store_policy(args) }
-    @agent.register_tool("get_store_hours") { |args| handle_get_store_hours }
-    @agent.register_tool("get_payment_methods") { |args| handle_get_payment_methods }
-    @agent.register_tool("get_contact_info") { |args| handle_get_contact_info }
+    @agent.register_tool("get_store_policy", "Looking up store policy...") { |args| handle_get_store_policy(args) }
+    @agent.register_tool("get_store_hours", "Getting store hours...") { |args| handle_get_store_hours }
+    @agent.register_tool("get_payment_methods", "Getting payment methods...") { |args| handle_get_payment_methods }
+    @agent.register_tool("get_contact_info", "Getting contact information...") { |args| handle_get_contact_info }
   end
 
   def handle_get_store_policy(args)

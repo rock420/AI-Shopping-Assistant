@@ -154,8 +154,8 @@ class ProductSearchAgent
   end
   
   def register_tools
-    @agent.register_tool("search_products") { |args| handle_search_products(args) }
-    @agent.register_tool("get_product_details") { |args| handle_get_product_details(args) }
+    @agent.register_tool("search_products", "Searching for products...") { |args| handle_search_products(args) }
+    @agent.register_tool("get_product_details", "Getting product details...") { |args| handle_get_product_details(args) }
     @agent.register_tool("render_ui") { |args, context| handle_render_ui(args, context) }
   end
 

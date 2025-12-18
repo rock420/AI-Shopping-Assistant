@@ -77,6 +77,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, onBasketUpdate, onP
                         content={message.content}
                         timestamp={message.timestamp}
                         uiContext={message.uiContext}
+                        toolCall={message.toolCall}
                         onBasketUpdate={onBasketUpdate}
                         onPaymentDone={onPaymentDone}
                     />

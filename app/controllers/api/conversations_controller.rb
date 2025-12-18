@@ -76,6 +76,13 @@ module Api
             content: chunk[:content]
           }, event: 'content')
           
+        when "tool_call"
+          # Stream tool call information
+          sse.write({
+            tool_name: chunk[:tool_name],
+            ui_descriptor: chunk[:ui_descriptor],
+          }, event: 'tool_call')
+          
         when "done"
           # Save assistant response to conversation
           @conversation.messages = context[:messages]
