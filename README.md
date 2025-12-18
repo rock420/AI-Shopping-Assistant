@@ -13,7 +13,7 @@ The Conversational Checkout System enables customers to shop through natural lan
 
 ## Demo
 
-<video src="./assets/Shopping%20Assistant.mov" controls preload></video>
+[![Watch the video](./assets/demo.png)](https://www.youtube.com/watch?v=h4zQtGRQlc4)
 
 ## Assumptions
 1. **Authentication not required**: The application uses persistent session-based basket management to provide a seamless shopping experience for unauthenticated user.
