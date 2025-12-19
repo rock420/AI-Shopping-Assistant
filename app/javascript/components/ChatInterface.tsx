@@ -161,9 +161,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
 
     if (!conversationId) {
         return (
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow-md p-6" role="status" aria-live="polite">
                 <div className="flex items-center justify-center h-96">
-                    <div className="text-gray-600">Starting conversation...</div>
+                    <div className="flex flex-col items-center space-y-4">
+                        <div className="relative">
+                            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                        </div>
+                        <p className="text-gray-600 font-medium">Starting conversation...</p>
+                    </div>
                 </div>
             </div>
         );
@@ -171,33 +176,52 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ sessionId, onBasketUpdate
 
     return (
         <ConversationProvider conversationId={conversationId}>
-            <div className="bg-white rounded-lg shadow flex flex-col h-[600px] md:h-[calc(100vh-4rem)] md:max-h-[900px]">
+            <div className="bg-white rounded-lg shadow-md flex flex-col h-[600px] md:h-[calc(100vh-4rem)] md:max-h-[900px] transition-shadow hover:shadow-lg">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-900">Chat Assistant</h2>
+                <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-50 to-white">
+                    <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Chat Assistant</h2>
+                    </div>
                     <button
                         onClick={handleNewConversation}
-                        className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                        className="px-3 py-1.5 text-xs sm:text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-md transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={isLoading}
+                        aria-label="Start new conversation"
                     >
-                        New Conversation
+                        <span className="hidden sm:inline">New Conversation</span>
+                        <span className="sm:hidden">New</span>
                     </button>
                 </div>
 
                 {/* Error message */}
                 {error && (
-                    <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-800">{error}</p>
+                    <div className="mx-4 sm:mx-6 mt-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-md shadow-sm animate-slideDown" role="alert">
+                        <div className="flex items-start">
+                            <svg className="w-5 h-5 text-red-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-sm text-red-800">{error}</p>
+                        </div>
                     </div>
                 )}
 
                 {/* Messages */}
                 <div className="flex-1 overflow-hidden">
-                    <MessageList messages={messages} onBasketUpdate={onBasketUpdate} onPaymentDone={onPaymentDone} />
+                    <MessageList
+                        messages={messages}
+                        onBasketUpdate={onBasketUpdate}
+                        onPaymentDone={onPaymentDone}
+                        onSendMessage={handleSendMessage}
+                    />
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-gray-200">
+                <div className="border-t border-gray-200 bg-gray-50">
                     <MessageInput
                         onSend={handleSendMessage}
                         disabled={isLoading || !conversationId}

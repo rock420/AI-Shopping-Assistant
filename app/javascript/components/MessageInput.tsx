@@ -43,8 +43,8 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-4">
-            <div className="flex items-end space-x-3">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-4">
+            <div className="flex items-end space-x-2 sm:space-x-3">
                 <div className="flex-1 relative">
                     <textarea
                         ref={textareaRef}
@@ -54,18 +54,24 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
                         placeholder={disabled ? "Please wait..." : "Type your message..."}
                         disabled={disabled}
                         rows={1}
-                        className="w-full px-4 py-2 pr-4 md:pr-64 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+                        aria-label="Message input"
+                        className="w-full px-4 py-2.5 pr-4 md:pr-64 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed transition-all duration-200 placeholder:text-gray-400"
                         style={{ maxHeight: '120px' }}
                     />
-                    <div className="hidden md:block absolute bottom-2 right-2 text-xs text-gray-400 pointer-events-none">
-                        {!disabled && 'Press Enter to send, Shift+Enter for new line'}
+                    <div className="hidden md:block absolute bottom-2.5 right-3 text-xs text-gray-400 pointer-events-none select-none">
+                        {!disabled && (
+                            <span className="bg-white/80 px-1.5 py-0.5 rounded">
+                                <kbd className="font-mono text-xs">Enter</kbd> to send • <kbd className="font-mono text-xs">Shift+Enter</kbd> for new line
+                            </span>
+                        )}
                     </div>
                 </div>
 
                 <button
                     type="submit"
                     disabled={disabled || !inputValue.trim()}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                    aria-label={isLoading ? "Sending message" : "Send message"}
+                    className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2 shadow-md hover:shadow-lg disabled:shadow-none font-medium"
                 >
                     {isLoading ? (
                         <>
@@ -74,6 +80,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
+                                aria-hidden="true"
                             >
                                 <circle
                                     className="opacity-25"
@@ -89,7 +96,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                 />
                             </svg>
-                            <span>Sending</span>
+                            <span className="hidden sm:inline">Sending</span>
                         </>
                     ) : (
                         <>
@@ -98,6 +105,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
+                                aria-hidden="true"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -106,7 +114,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled, isLoading
                                     d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                                 />
                             </svg>
-                            <span>Send</span>
+                            <span className="hidden sm:inline">Send</span>
                         </>
                     )}
                 </button>
