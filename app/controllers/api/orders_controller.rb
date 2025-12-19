@@ -33,7 +33,7 @@ module Api
       @order = OrderService.create_from_basket(basket)
 
       # Ideally, we should also generate a secure payment url using any thrid party payment service and sent that
-      # for the scope of the assignment, we are omitting that 
+      # for the scope of the project, we are omitting that 
 
       render :create, status: :created
     rescue InsufficientInventoryError => e

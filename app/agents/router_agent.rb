@@ -103,7 +103,7 @@ class RouterAgent
       Respond with **ONLY** the agent name: product_search, cart_management, or general_conversation
     PROMPT
     
-    Agent.new(system_prompt: system_prompt, tools: [])
+    Agent.new(system_prompt: system_prompt, tools: [], model: 'gpt-4.1-nano')
   end
   
   def classify_message(message, context)

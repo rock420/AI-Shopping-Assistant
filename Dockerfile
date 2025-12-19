@@ -2,8 +2,8 @@
 # check=error=true
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t circle_quest .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name circle_quest circle_quest
+# docker build -t ai_shopping_assistant .
+# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name ai_shopping_assistant ai_shopping_assistant
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 

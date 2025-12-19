@@ -148,7 +148,7 @@ class PaymentService
     # 2. Asynchronously trigger cartAgent to generate a response based on system message -> we would need to use 
     # some Queue to process it asynchronously as we shouldn't block the webhook call
     #
-    # Though both the approaches are good, each have their own pros and cons. For this assignment, I am going ahead
+    # Though both the approaches are good, each have their own pros and cons. For this project, I am going ahead
     # with synchronous version of approach 2 to give a more natural, contextual response.
     
     begin

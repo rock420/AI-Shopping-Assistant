@@ -369,7 +369,7 @@ DEPENDENCIES
   openai (~> 0.37.0)
   pagy (~> 6.0)
   pg (~> 1.1)
-  pg_search
+  pg_search (~> 2.3)
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.0, >= 8.0.0.1)

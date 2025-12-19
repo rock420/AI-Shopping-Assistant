@@ -20,6 +20,8 @@ gem "cssbundling-rails"
 gem "jbuilder"
 # Pagination [https://github.com/ddnexus/pagy]
 gem "pagy", "~> 6.0"
+# Full-text search for PostgreSQL [https://github.com/Casecommons/pg_search]
+gem "pg_search", "~> 2.3"
 # Official OpenAI Ruby SDK [https://github.com/openai/openai-ruby]
 gem "openai", "~> 0.37.0"
 
